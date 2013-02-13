@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Heatmap test</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+	<style>
+		html, body, canvas, img, div { margin:0; padding:0; width:100%; height:100%; position:absolute; }
+		div { width:auto; height:auto; right:0; bottom:0; }
+	</style>
+</head>
+<body>
+	<canvas id="map"></canvas>
+	<div>
+		<p>Move your cursor/finger around the image.</p>
+		<p><button id="rando">Generate Random Data</button></p>
+		<p>Random image from <a href="http://lorempixel.com/">lorempixel.com</a></p>
+	</div>
+
+	<script>
+		var exports = {}, module = { exports:exports }; // fake commonjs
+	</script>
+	<script src="heatmap.js"></script>
+	<script>
+	(function(){
+
+		var heatmap = module.exports, canvas = document.getElementById('map'),
+			data = [], index, offx = canvas.offsetLeft, offy = canvas.offsetTop;
+		canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight;
+		heat = heatmap(canvas, data, { impact:30 });
+		function reindex() {
+			index = {};
+			for (var i = 0; i < data.length; ++i) { index[data[i].x + ',' + data[i].y] = i; }
+		}
+		reindex();
+		function add(evt) {
+			var x = evt.pageX - offx, y = evt.pageY - offy,
+				key = x + ',' + y, context = canvas.getContext('2d');
+			if (key in index) {
+				data[index[key]].value += 1;
+			} else {
+				data[index[key] = data.length] = {
+					x:x, y:y, value:1
+				};
+			}
+			heat.update([ data[index[key]] ]);
+		}
+		function stop(evt) { evt.preventDefault(); }
+		canvas.addEventListener('mousemove', add, false);
+		canvas.addEventListener('touchstart', stop, false); // no scrolling
+		canvas.addEventListener('touchmove', add, false);
+		
+		var img = new Image(), html = document.documentElement;
+		img.src = 'http://lorempixel.com/' + html.clientWidth + '/' + html.clientHeight;
+		document.body.insertBefore(img, canvas);
+
+		document.getElementById('rando').addEventListener('click', function(evt) {
+			var width = canvas.width, height = canvas.height, data = [],
+				i, ii = width * height;
+            for (i = 0; i < ii; ++i) {
+				if (Math.random() < .999) { continue; } // skip ~99.9% of pixels
+                data.push({ x:i % width, y:~~(i / width), value:Math.abs(Math.sin(Math.random()))+5 });
+            }
+			reindex();
+            heat = heatmap(canvas, data, { impact:30 });
+		});
+
+	}());
+	</script>
+</body>
+</html>
+

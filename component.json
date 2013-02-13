@@ -1,0 +1,11 @@
+{
+	"name": "heatmap",
+	"repo": "avanwago/heatmap",
+	"description": "Semi-opaque heatmap drawn with canvas",
+	"version": "0.0.1",
+	"keywords": [ "heatmap", "heat", "canvas" ],
+	"dependencies": {},
+	"main": "heatmap.js"
+	"scripts": [ "heatmap.js" ],
+	"license": "MIT"
+}
